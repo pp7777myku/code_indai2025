@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Fault Diagnosis Assistant (LLM-based)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        h1, h2 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.2em;
+        }
+        h2 {
+            font-size: 1.4em;
+            color: #007bff;
+        }
+        .input-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .input-section input[type="text"],
+        .input-section textarea {
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Include padding in width */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .input-section input[type="text"]:focus,
+        .input-section textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        .input-section textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .input-section button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .input-section button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .input-section button:active {
+            transform: translateY(0);
+        }
+        .output-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+        .output-section h3 {
+            color: #0056b3;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+        .output-box {
+            background-color: #e9f5ff;
+            border: 1px solid #cce5ff;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            word-wrap: break-word; /* Break long words */
+            min-height: 150px;
+            font-size: 0.95em;
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .disclaimer {
+            font-size: 0.85em;
+            color: #777;
+            text-align: center;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Industrial Fault Diagnosis Assistant</h1>
+        <h2>Interactive Method Based on Large Language Models</h2>
+
+        <div class="input-section">
+            <label for="equipmentName">Equipment Name (e.g., Centrifugal Pump, PLC, Production Line A):</label>
+            <input type="text" id="equipmentName" name="equipmentName" placeholder="Enter equipment name (e.g., 'Hydraulic Press', 'Conveyor Belt')" required>
+
+            <label for="faultSymptoms">Describe the Fault Symptoms in Detail:</label>
+            <textarea id="faultSymptoms" name="faultSymptoms" placeholder="e.g., 'Pump making loud grinding noise and vibrating excessively', 'PLC output is inconsistent with sensor readings', 'Production line stops abruptly with error code E001', 'Motor overheating and emitting burning smell'." required></textarea>
+
+            <button type="submit" onclick="diagnoseFault()">Diagnose Fault</button>
+        </div>
+
+        <div class="output-section">
+            <h3>Diagnosis Result</h3>
+            <div id="diagnosisOutput" class="output-box">
+                Your diagnosis will appear here. Please enter equipment name and symptoms above, then click 'Diagnose Fault'.
+            </div>
+        </div>
+
+        <p class="disclaimer">
+            **Disclaimer:** This tool provides AI-generated diagnostic suggestions based on available data and language model capabilities.
+            It is intended as an assistant and should **not** replace professional judgment. Always consult with a qualified engineer or technician for critical maintenance and repair decisions.
+        </p>
+    </div>
+
+    <script>
+        // This JavaScript function is a placeholder for interaction with your backend.
+        // In a real application, you would send the input data to a server (e.g., using fetch API)
+        // and display the structured response received from your Python/LLM logic.
+
+        function diagnoseFault() {
+            const equipment = document.getElementById('equipmentName').value.trim();
+            const symptoms = document.getElementById('faultSymptoms').value.trim();
+            const outputDiv = document.getElementById('diagnosisOutput');
+
+            if (!equipment || !symptoms) {
+                outputDiv.textContent = "Please provide both the equipment name and detailed fault symptoms to get a diagnosis.";
+                return;
+            }
+
+            outputDiv.textContent = "Diagnosing... Please wait, this may take a moment as the AI processes the information.";
+
+            // --- Real Backend Integration (Conceptual Example) ---
+            // Uncomment and modify this section when you set up your Python backend API.
+            /*
+            fetch('/api/diagnose', { // Replace with your actual API endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ equipment: equipment, symptoms: symptoms }),
+            })
+            .then(response => response.json()) // Assuming your backend returns JSON
+            .then(data => {
+                // Assuming 'data' contains fields like:
+                // {
+                //   "diagnosis_result": "...",
+                //   "possible_causes": ["...", "..."],
+                //   "diagnostic_steps": ["...", "..."],
+                //   "solution": "..."
+                // }
+                let formattedOutput = `**Diagnosis Result:** ${data.diagnosis_result || 'N/A'}\n\n`;
+                formattedOutput += `**Possible Causes:**\n- ${data.possible_causes ? data.possible_causes.join('\n- ') : 'N/A'}\n\n`;
+                formattedOutput += `**Diagnostic Steps:**\n- ${data.diagnostic_steps ? data.diagnostic_steps.join('\n- ') : 'N/A'}\n\n`;
+                formattedOutput += `**Solution:** ${data.solution || 'N/A'}`;
+
+                outputDiv.textContent = formattedOutput;
+            })
+            .catch(error => {
+                console.error('Error during diagnosis API call:', error);
+                outputDiv.textContent = 'An error occurred during diagnosis. Please check your network connection or try again later.';
+            });
+            */
+            // --- End Real Backend Integration Example ---
+
+
+            // --- Placeholder/Mock Response (for immediate testing without a backend) ---
+            // This part will run if the real backend integration is commented out.
+            setTimeout(() => {
+                const dummyDiagnosis = `
+**Diagnosis Result:** Based on the symptoms you've described, your ${equipment} appears to have a critical operational issue that warrants immediate investigation.
+
+**Possible Causes:**
+- Severe internal component wear (e.g., bearings, gears, pistons)
+- Critical misalignment of mechanical parts
+- Structural fatigue or damage to the equipment
+- Sensor malfunction leading to erroneous readings (less likely given "grinding noise")
+- Insufficient lubrication or cooling leading to overheating
+
+**Diagnostic Steps:**
+- **Immediately shut down** the equipment to prevent further damage or safety hazards.
+- Visually inspect the accessible areas for any obvious signs of damage, leaks, or loose components.
+- Listen for the exact location and type of noise using a stethoscope or listening device.
+- Check the operating temperature of the motor, bearings, and other critical components.
+- Review recent maintenance logs and operational parameters for anomalies.
+- If safe and accessible, manually rotate or test components to pinpoint the source of resistance or noise.
+- Consult the equipment's technical manual for specific troubleshooting guides related to such symptoms.
+
+**Solution:**
+- If **bearing wear** is suspected, plan for urgent replacement of all affected bearings.
+- If **misalignment** is detected, perform a precision alignment using laser alignment tools.
+- For **structural damage**, assess the extent and consider repair or replacement of the affected part.
+- Ensure proper and adequate **lubrication**. Check lubrication levels and quality, and top up/change as necessary.
+- After any repairs, perform a thorough operational test and monitoring before returning to full service.
+                `;
+                outputDiv.textContent = dummyDiagnosis;
+            }, 1800); // Simulate network delay for a better user experience
+            // --- End Placeholder/Mock Response ---
+        }
+    </script>
+</body>
+</html>
