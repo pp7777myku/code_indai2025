@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial Fault Diagnosis Assistant (LLM-based)</title>
+    <title>Помощник по диагностике промышленных неисправностей (на основе LLM)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -121,30 +121,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>Industrial Fault Diagnosis Assistant</h1>
-        <h2>Interactive Method Based on Large Language Models</h2>
+        <h1>Помощник по диагностике промышленных неисправностей</h1>
+        <h2>Интерактивный метод на основе больших языковых моделей</h2>
 
         <div class="input-section">
-            <label for="equipmentName">Equipment Name (e.g., Centrifugal Pump, PLC, Production Line A):</label>
-            <input type="text" id="equipmentName" name="equipmentName" placeholder="Enter equipment name (e.g., 'Hydraulic Press', 'Conveyor Belt')" required>
+            <label for="equipmentName">Название оборудования (например, центробежный насос, ПЛК, производственная линия А):</label>
+            <input type="text" id="equipmentName" name="equipmentName" placeholder="Введите название оборудования (например, 'Гидравлический пресс', 'Конвейерная лента')" required>
 
-            <label for="faultSymptoms">Describe the Fault Symptoms in Detail:</label>
-            <textarea id="faultSymptoms" name="faultSymptoms" placeholder="e.g., 'Pump making loud grinding noise and vibrating excessively', 'PLC output is inconsistent with sensor readings', 'Production line stops abruptly with error code E001', 'Motor overheating and emitting burning smell'." required></textarea>
+            <label for="faultSymptoms">Подробно опишите симптомы неисправности:</label>
+            <textarea id="faultSymptoms" name="faultSymptoms" placeholder="например, 'Насос издает громкий скрежет и сильно вибрирует', 'Выход ПЛК не соответствует показаниям датчиков', 'Производственная линия внезапно останавливается с кодом ошибки E001', 'Двигатель перегревается и издает запах гари'." required></textarea>
 
-            <button type="submit" onclick="diagnoseFault()">Diagnose Fault</button>
+            <button type="submit" onclick="diagnoseFault()">Диагностировать неисправность</button>
         </div>
 
         <div class="output-section">
-            <h3>Diagnosis Result</h3>
+            <h3>Результат диагностики</h3>
             <div id="diagnosisOutput" class="output-box">
-                Your diagnosis will appear here. Please enter equipment name and symptoms above, then click 'Diagnose Fault'.
+                Здесь появится ваш диагноз. Пожалуйста, введите название оборудования и симптомы выше, затем нажмите «Диагностировать неисправность».
             </div>
         </div>
 
-        <p class="disclaimer">
-            **Disclaimer:** This tool provides AI-generated diagnostic suggestions based on available data and language model capabilities.
-            It is intended as an assistant and should **not** replace professional judgment. Always consult with a qualified engineer or technician for critical maintenance and repair decisions.
-        </p>
     </div>
 
     <script>
@@ -158,11 +154,11 @@
             const outputDiv = document.getElementById('diagnosisOutput');
 
             if (!equipment || !symptoms) {
-                outputDiv.textContent = "Please provide both the equipment name and detailed fault symptoms to get a diagnosis.";
+                outputDiv.textContent = "Пожалуйста, укажите название оборудования и подробные симптомы неисправности для получения диагноза.";
                 return;
             }
 
-            outputDiv.textContent = "Diagnosing... Please wait, this may take a moment as the AI processes the information.";
+            outputDiv.textContent = "Диагностика... Пожалуйста, подождите, пока ИИ обрабатывает информацию.";
 
             // --- Real Backend Integration (Conceptual Example) ---
             // Uncomment and modify this section when you set up your Python backend API.
@@ -183,16 +179,16 @@
                 //   "diagnostic_steps": ["...", "..."],
                 //   "solution": "..."
                 // }
-                let formattedOutput = `**Diagnosis Result:** ${data.diagnosis_result || 'N/A'}\n\n`;
-                formattedOutput += `**Possible Causes:**\n- ${data.possible_causes ? data.possible_causes.join('\n- ') : 'N/A'}\n\n`;
-                formattedOutput += `**Diagnostic Steps:**\n- ${data.diagnostic_steps ? data.diagnostic_steps.join('\n- ') : 'N/A'}\n\n`;
-                formattedOutput += `**Solution:** ${data.solution || 'N/A'}`;
+                let formattedOutput = `**Результат диагностики:** ${data.diagnosis_result || 'N/A'}\n\n`;
+                formattedOutput += `**Возможные причины:**\n- ${data.possible_causes ? data.possible_causes.join('\n- ') : 'N/A'}\n\n`;
+                formattedOutput += `**Шаги диагностики:**\n- ${data.diagnostic_steps ? data.diagnostic_steps.join('\n- ') : 'N/A'}\n\n`;
+                formattedOutput += `**Решение:** ${data.solution || 'N/A'}`;
 
                 outputDiv.textContent = formattedOutput;
             })
             .catch(error => {
                 console.error('Error during diagnosis API call:', error);
-                outputDiv.textContent = 'An error occurred during diagnosis. Please check your network connection or try again later.';
+                outputDiv.textContent = 'Произошла ошибка при вызове API диагностики. Проверьте сетевое подключение или повторите попытку позже.';
             });
             */
             // --- End Real Backend Integration Example ---
@@ -202,30 +198,30 @@
             // This part will run if the real backend integration is commented out.
             setTimeout(() => {
                 const dummyDiagnosis = `
-**Diagnosis Result:** Based on the symptoms you've described, your ${equipment} appears to have a critical operational issue that warrants immediate investigation.
+**Результат диагностики:** Согласно описанным вами симптомам, ваше оборудование ${equipment}, по-видимому, имеет критическую эксплуатационную проблему, требующую немедленного расследования.
 
-**Possible Causes:**
-- Severe internal component wear (e.g., bearings, gears, pistons)
-- Critical misalignment of mechanical parts
-- Structural fatigue or damage to the equipment
-- Sensor malfunction leading to erroneous readings (less likely given "grinding noise")
-- Insufficient lubrication or cooling leading to overheating
+**Возможные причины:**
+- Серьезный внутренний износ компонентов (например, подшипников, шестерен, поршней)
+- Критическое рассогласование механических частей
+- Усталость или повреждение конструкции оборудования
+- Неисправность датчика, приводящая к ошибочным показаниям (менее вероятно, учитывая «скрежет»)
+- Недостаточная смазка или охлаждение, приводящие к перегреву
 
-**Diagnostic Steps:**
-- **Immediately shut down** the equipment to prevent further damage or safety hazards.
-- Visually inspect the accessible areas for any obvious signs of damage, leaks, or loose components.
-- Listen for the exact location and type of noise using a stethoscope or listening device.
-- Check the operating temperature of the motor, bearings, and other critical components.
-- Review recent maintenance logs and operational parameters for anomalies.
-- If safe and accessible, manually rotate or test components to pinpoint the source of resistance or noise.
-- Consult the equipment's technical manual for specific troubleshooting guides related to such symptoms.
+**Шаги диагностики:**
+- **Немедленно выключите** оборудование, чтобы предотвратить дальнейшие повреждения или угрозы безопасности.
+- Визуально осмотрите доступные области на предмет явных признаков повреждений, утечек или ослабленных компонентов.
+- Прослушайте точное местоположение и тип шума с помощью стетоскопа или прибора для прослушивания.
+- Проверьте рабочую температуру двигателя, подшипников и других критически важных компонентов.
+- Просмотрите последние журналы технического обслуживания и рабочие параметры на предмет аномалий.
+- Если безопасно и доступно, вручную поверните или проверьте компоненты, чтобы определить источник сопротивления или шума.
+- Обратитесь к техническому руководству оборудования за конкретными инструкциями по устранению неполадок, связанных с такими симптомами.
 
-**Solution:**
-- If **bearing wear** is suspected, plan for urgent replacement of all affected bearings.
-- If **misalignment** is detected, perform a precision alignment using laser alignment tools.
-- For **structural damage**, assess the extent and consider repair or replacement of the affected part.
-- Ensure proper and adequate **lubrication**. Check lubrication levels and quality, and top up/change as necessary.
-- After any repairs, perform a thorough operational test and monitoring before returning to full service.
+**Решение:**
+- Если подозревается **износ подшипников**, запланируйте срочную замену всех затронутых подшипников.
+- Если обнаружено **рассогласование**, выполните точное выравнивание с помощью лазерных инструментов.
+- При **повреждении конструкции** оцените степень повреждения и рассмотрите возможность ремонта или замены затронутой части.
+- Обеспечьте правильную и адекватную **смазку**. Проверьте уровень и качество смазки, при необходимости долейте/замените.
+- После любого ремонта проведите тщательное эксплуатационное тестирование и мониторинг перед возвратом к полной эксплуатации.
                 `;
                 outputDiv.textContent = dummyDiagnosis;
             }, 1800); // Simulate network delay for a better user experience

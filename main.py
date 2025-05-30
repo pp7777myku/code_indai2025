@@ -7,28 +7,28 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import Request, Form
 
-# 设置代理（如果不需要可以注释掉）
+# Set proxy (can be commented out if not needed)
 os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 
-# 读取Gemini API Key
+# Read Gemini API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 if not GEMINI_API_KEY:
     raise Exception("Missing Gemini API Key. Please set GEMINI_API_KEY environment variable.")
 genai.configure(api_key=GEMINI_API_KEY)
 
-# 配置案例文件路径
+# Configure cases file path
 CASES_FILE_PATH = 'cases.csv'
 
-# 创建FastAPI应用
+# Create FastAPI app
 app = fastapi.FastAPI()
 
-# 指定模板目录
+# Specify templates directory
 templates = Jinja2Templates(directory="templates")
 
 
 def load_and_serialize_cases() -> str:
-    """加载案例并序列化成文本"""
+    """Load cases and serialize them into text"""
     cases = []
     with open(CASES_FILE_PATH, mode='r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -42,7 +42,7 @@ def load_and_serialize_cases() -> str:
 
 
 def call_gemini_with_explanation(user_input: str) -> (str, str):
-    """发送prompt到Gemini，返回过程+最终结果"""
+    """Send prompt to Gemini, return process + final result"""
     serialized_cases = load_and_serialize_cases()
     prompt = f"""
 You are a senior industrial equipment maintenance expert and fault diagnosis engineer. Please accurately diagnose potential fault causes based on the equipment and fault symptoms provided by the user, **leveraging the "Related Knowledge Base Information" provided below**, and then provide detailed, actionable diagnostic steps and solutions.
@@ -58,7 +58,7 @@ Please strictly adhere to the following rules:
 5.  **Ask for More Information:** If the information is insufficient for an accurate diagnosis, proactively ask the user for more details.
 6.  **Avoid Guesswork:** If you cannot determine a definitive answer, state that the information is insufficient.
 
-Now, please diagnose the following fault:
+Now, please diagnose the following fault by Russian language:
 Equipment: [User's input for equipment name]
 Fault Symptom: [User's input for fault description]
 
@@ -74,7 +74,7 @@ Answer:
     response = model.generate_content(prompt)
     full_text = response.text.strip()
 
-    # 解析出解释和最终动作
+    # Parse out explanation and final action
     if "Control Action:" in full_text:
         explanation, control_action = full_text.split("Control Action:", 1)
         return explanation.strip(), control_action.strip()
@@ -84,13 +84,13 @@ Answer:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    """首页展示"""
+    """Display home page"""
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.post("/chat", response_class=HTMLResponse)
 async def chat(request: Request, user_input: str = Form(...)):
-    """处理用户输入"""
+    """Handle user input"""
     explanation, control_action = call_gemini_with_explanation(user_input)
     return templates.TemplateResponse("index.html", {
         "request": request,
