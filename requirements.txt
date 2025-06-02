@@ -1,7 +1,7 @@
+# requirements.txt
 fastapi
 uvicorn[standard]
-google-generativeai
 requests
+google-generativeai
 Jinja2
-python-multipart
-gunicorn
+python-multipart  # FastAPI 处理表单数据和文件上传需要
