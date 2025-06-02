@@ -49,13 +49,13 @@
         .input-section input[type="text"],
         .input-section input[type="file"],
         .input-section textarea {
-            width: calc(100% - 24px); /* Account for padding */
+            width: calc(100% - 24px);
             padding: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 1rem;
-            box-sizing: border-box; /* Include padding in width */
+            box-sizing: border-box;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .input-section input[type="text"]:focus,
@@ -69,21 +69,28 @@
             min-height: 100px;
             resize: vertical;
         }
+        .file-input-note {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 15px;
+            display: block;
+        }
         .input-section button, .link-button {
-            display: inline-block; /* Changed for side-by-side */
-            width: auto; /* Fit content */
+            display: inline-block;
+            width: auto;
             padding: 12px 20px;
             background-color: #007bff;
-            color: white !important; /* Ensure text is white */
+            color: white !important;
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            text-decoration: none; /* For <a> styled as button */
+            text-decoration: none;
             text-align: center;
-            margin-right: 10px; /* Space between buttons */
+            margin-right: 10px;
+            margin-top: 5px; /* Added some top margin for buttons */
         }
         .input-section button:hover, .link-button:hover {
             background-color: #0056b3;
@@ -93,9 +100,10 @@
             transform: translateY(0);
         }
         .button-container {
-            display: flex; /* Align buttons in a row */
-            justify-content: flex-start; /* Align to the left */
-            margin-top: 10px;
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 15px; /* Adjusted margin */
+            flex-wrap: wrap;
         }
         .output-section {
             margin-top: 30px;
@@ -120,13 +128,14 @@
             color: #333;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .error-message {
+        .error-message, #fileError {
             color: #D8000C;
             background-color: #FFD2D2;
             border: 1px solid #D8000C;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
+            margin-top: 5px;
         }
         .disclaimer {
             font-size: 0.85em;
@@ -134,6 +143,21 @@
             text-align: center;
             margin-top: 20px;
             padding: 0 10px;
+        }
+        #fileList {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        #fileList ul { /* Style for the file list */
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 5px;
+        }
+        #fileList li {
+            margin-bottom: 3px;
+            word-break: break-all; /* Break long filenames */
         }
     </style>
 </head>
@@ -143,12 +167,12 @@
         <h2>Интерактивный метод на основе больших языковых моделей</h2>
 
         <div class="input-section">
-            <label for="systemPrompt">Системная инструкция для ИИ (задайте роль, правила, язык ответа и т.д.):</label>
-            <textarea id="systemPrompt" name="systemPrompt" placeholder="Пример: Вы — опытный инженер по техническому обслуживанию промышленного оборудования...">You are a senior industrial equipment maintenance expert and fault diagnosis engineer. Please accurately diagnose potential fault causes based on the equipment and fault symptoms provided by the user, any attached files (like images or data logs), AND **leveraging the 'Related Knowledge Base Information' provided below**. Then provide detailed, actionable diagnostic steps and solutions.
+            <label for="systemPrompt">Системная инструкция для ИИ:</label>
+            <textarea id="systemPrompt" name="systemPrompt" placeholder="Пример: Вы — опытный инженер...">You are a senior industrial equipment maintenance expert and fault diagnosis engineer. Please accurately diagnose potential fault causes based on the equipment and fault symptoms provided by the user, any attached files (like images or data logs), AND **leveraging the 'Related Knowledge Base Information' provided below**. Then provide detailed, actionable diagnostic steps and solutions.
 
 Please strictly adhere to the following rules:
 1.  **Reference Knowledge Base:** Prioritize using the "Related Knowledge Base Information" for diagnosis. If the knowledge base does not contain a direct match, infer based on your general professional knowledge and any provided files.
-2.  **Analyze Files:** If a file is attached (e.g., an image of the fault, sensor readings, error logs), incorporate its information into your diagnosis.
+2.  **Analyze Files:** If one or more files are attached (e.g., images of the fault, sensor readings, error logs), incorporate their information into your diagnosis.
 3.  **Professionalism:** Use professional terminology from the industrial domain.
 4.  **Detail:** List all possible fault causes, diagnostic steps, and repair measures as comprehensively as possible.
 5.  **Structure:** Your response should be clearly divided into four sections: "Diagnosis Result," "Possible Causes," "Diagnostic Steps," and "Solution."
@@ -162,8 +186,15 @@ Please strictly adhere to the following rules:
             <label for="faultSymptoms">Подробно опишите симптомы неисправности:</label>
             <textarea id="faultSymptoms" name="faultSymptoms" placeholder="например, 'Насос издает громкий скрежет...'">Пресс не развивает полного давления, медленно движется рабочий цилиндр, слышен посторонний шум в районе насоса.</textarea>
 
-            <label for="faultFile">Загрузить файл с информацией о неисправности (изображение, лог и т.д.):</label>
-            <input type="file" id="faultFile" name="faultFile">
+            <label for="faultFile">Загрузить файл(ы) с информацией о неисправности:</label>
+            <input type="file" id="faultFile" name="fault_files" multiple onchange="updateFileListAndValidate()"
+                   accept="image/png, image/jpeg, image/webp, image/heic, image/heif, application/pdf, text/plain, text/markdown, text/csv, audio/wav, audio/mp3, audio/ogg, audio/flac, video/mp4, video/webm, video/mov">
+            <span class="file-input-note">
+                Макс. размер одного файла: 50МБ. Поддерживаемые форматы: PNG, JPG, WEBP, PDF, TXT, MD, CSV, WAV, MP3, OGG, FLAC, MP4, WEBM, MOV.
+            </span>
+            <div id="fileList"></div>
+            <div id="fileError" style="display:none;"></div>
+
 
             <div class="button-container">
                 <button type="button" onclick="diagnoseFault()">Диагностировать неисправность</button>
@@ -183,15 +214,82 @@ Please strictly adhere to the following rules:
     </div>
 
     <script>
+        const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+        const ALLOWED_MIME_TYPES_JS = [ // Используем этот список для клиентской проверки
+            "image/png", "image/jpeg", "image/webp", "image/heic", "image/heif",
+            "application/pdf",
+            "text/plain", "text/markdown", "text/csv",
+            "audio/wav", "audio/mp3", "audio/ogg", "audio/flac",
+            "video/mp4", "video/webm", "video/mov"
+        ];
+        // Список расширений для атрибута accept (более дружелюбно для пользователя)
+        // const ACCEPT_EXTENSIONS = ".png,.jpg,.jpeg,.webp,.heic,.heif,.pdf,.txt,.md,.csv,.wav,.mp3,.ogg,.flac,.mp4,.webm,.mov";
+        // document.getElementById('faultFile').accept = ACCEPT_EXTENSIONS; // Можно установить динамически
+
+
+        function updateFileListAndValidate() {
+            const input = document.getElementById('faultFile');
+            const fileListDiv = document.getElementById('fileList');
+            const fileErrorDiv = document.getElementById('fileError');
+            fileListDiv.innerHTML = '';
+            fileErrorDiv.innerHTML = '';
+            fileErrorDiv.style.display = 'none';
+            let allFilesAreCurrentlyValid = true; // Флаг для текущей валидации в этой функции
+
+            if (input.files.length > 0) {
+                const ul = document.createElement('ul');
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    const li = document.createElement('li');
+                    let fileInfo = `Файл: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB, тип: ${file.type || 'не определен'})`;
+
+                    if (file.size > MAX_FILE_SIZE_BYTES) {
+                        fileInfo += ` <strong style="color:red;">(Слишком большой! Макс: 50MB)</strong>`;
+                        allFilesAreCurrentlyValid = false;
+                    }
+                    // Клиентская проверка MIME типа может быть не всегда надежной,
+                    // особенно если у файла нет расширения или это необычный тип.
+                    // Серверная проверка будет окончательной.
+                    // Здесь мы можем предупредить, если тип не определен или явно не в списке.
+                    if (file.type && !ALLOWED_MIME_TYPES_JS.includes(file.type.toLowerCase())) {
+                        fileInfo += ` <strong style="color:orange;">(Тип файла может не поддерживаться)</strong>`;
+                        // Не будем строго блокировать на клиенте только из-за этого, но покажем предупреждение.
+                    } else if (!file.type) { // Тип не определен браузером
+                        fileInfo += ` <strong style="color:orange;">(Не удалось определить тип файла)</strong>`;
+                    }
+                    li.innerHTML = fileInfo;
+                    ul.appendChild(li);
+                }
+                fileListDiv.appendChild(ul);
+
+                if (!allFilesAreCurrentlyValid) { // Если хотя бы один файл слишком большой
+                     fileErrorDiv.innerHTML = 'Один или несколько файлов превышают лимит размера (50МБ). Пожалуйста, исправьте перед отправкой.';
+                     fileErrorDiv.style.display = 'block';
+                }
+            }
+            return allFilesAreCurrentlyValid; // Возвращает true, если все файлы прошли текущую проверку размера
+        }
+
         async function diagnoseFault() {
+            const outputDiv = document.getElementById('diagnosisOutput');
+            const fileErrorDiv = document.getElementById('fileError');
+
+            // Выполняем валидацию еще раз перед отправкой
+            if (!updateFileListAndValidate()) {
+                 // Если updateFileListAndValidate вернула false (из-за размера), показываем ошибку в outputDiv
+                 outputDiv.innerHTML = `<p class="error-message">Пожалуйста, убедитесь, что все файлы не превышают лимит в 50МБ.</p>`;
+                 fileErrorDiv.style.display = 'block'; // Убедимся, что fileErrorDiv тоже виден
+                 return;
+            }
+            fileErrorDiv.style.display = 'none'; // Скрыть предыдущие ошибки валидации файлов, если прошли
+
             const systemPrompt = document.getElementById('systemPrompt').value.trim();
             const equipment = document.getElementById('equipmentName').value.trim();
             const symptoms = document.getElementById('faultSymptoms').value.trim();
-            const faultFile = document.getElementById('faultFile').files[0]; // Get the file object
-            const outputDiv = document.getElementById('diagnosisOutput');
+            const faultFilesInput = document.getElementById('faultFile');
 
             if (!systemPrompt || !equipment || !symptoms) {
-                outputDiv.innerHTML = `<p class="error-message">Пожалуйста, заполните все обязательные текстовые поля: системную инструкцию, название оборудования и симптомы неисправности.</p>`;
+                outputDiv.innerHTML = `<p class="error-message">Пожалуйста, заполните все обязательные текстовые поля.</p>`;
                 return;
             }
 
@@ -201,43 +299,57 @@ Please strictly adhere to the following rules:
             formData.append('system_prompt', systemPrompt);
             formData.append('equipment', equipment);
             formData.append('symptoms', symptoms);
-            if (faultFile) {
-                formData.append('fault_file', faultFile);
+
+            // Добавляем только валидные (по крайней мере по размеру) файлы
+            if (faultFilesInput.files.length > 0) {
+                for (let i = 0; i < faultFilesInput.files.length; i++) {
+                    const file = faultFilesInput.files[i];
+                    if (file.size <= MAX_FILE_SIZE_BYTES) { // Повторная проверка размера перед добавлением
+                         // Сервер все равно проверит тип, здесь мы доверяем ALLOWED_MIME_TYPES_JS для UI
+                        formData.append('fault_files', file);
+                    } else {
+                        // Эта ситуация не должна возникнуть, если updateFileListAndValidate() работает правильно
+                        logger.warn(`Файл ${file.name} пропущен из-за размера на этапе FormData.`);
+                    }
+                }
             }
 
             try {
-                // We are not setting Content-Type header manually for FormData.
-                // The browser will set it to multipart/form-data with the correct boundary.
                 const response = await fetch('/chat', {
                     method: 'POST',
                     body: formData,
                 });
 
+                const responseDataText = await response.text(); // Сначала получаем текст ответа
+                let data;
+                try {
+                    data = JSON.parse(responseDataText); // Пытаемся распарсить как JSON
+                } catch (e) {
+                    // Если не JSON, значит, возможно, это HTML ошибка от сервера или что-то еще
+                    console.error("Response was not JSON:", responseDataText);
+                    outputDiv.innerHTML = `<p class="error-message">Ошибка от сервера: Не удалось обработать ответ. Статус: ${response.status}. Ответ: <br><pre>${responseDataText.substring(0, 500)}...</pre></p>`;
+                    return;
+                }
+
+
                 if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = await response.json();
-                    } catch (e) {
-                        errorData = { error: `Ошибка сервера: ${response.status}`, details: await response.text() };
-                    }
-                    console.error('Error during diagnosis API call:', errorData);
-                    let errorMsg = `Произошла ошибка: ${errorData.error || response.statusText}`;
-                    if (errorData.details && errorData.details !== errorData.error) {
-                        errorMsg += `<br>Детали: ${errorData.details}`;
+                    console.error('Error during diagnosis API call:', data);
+                    let errorMsg = `Произошла ошибка: ${data.error || data.detail || response.statusText}`;
+                    if (data.details && data.details !== (data.error || data.detail)) { // data.detail от HTTPException FastAPI
+                        errorMsg += `<br>Детали: ${data.details}`;
                     }
                     outputDiv.innerHTML = `<p class="error-message">${errorMsg}</p>`;
                     return;
                 }
 
-                const data = await response.json();
-
+                // data уже должно быть распарсенным JSON объектом
                 if (data.error) {
                      outputDiv.innerHTML = `<p class="error-message">Ошибка от сервера: ${data.error}${data.details ? '<br>Детали: ' + data.details : ''}</p>`;
                 } else {
                     let formattedOutput = "";
                     if (data.explanation) {
                         let explanationHtml = data.explanation.replace(/\n/g, '<br>');
-                        explanationHtml = explanationHtml.replace(/\*\*(Результат диагностики|Возможные причины|Диагностические шаги|Diagnosis Result|Possible Causes|Diagnostic Steps):\*\*/g, '<strong>$1:</strong>');
+                        explanationHtml = explanationHtml.replace(/\*\*(Результат диагностики|Возможные причины|Диагностические шаги|Diagnosis Result|Possible Causes|Diagnostic Steps):\*\*/gi, '<strong>$1:</strong>'); // gi для регистронезависимости
                         formattedOutput += `<div>${explanationHtml}</div>`;
                     } else {
                         formattedOutput += `<p>Объяснение не предоставлено.</p>`;
@@ -245,7 +357,7 @@ Please strictly adhere to the following rules:
 
                     if (data.control_action) {
                          let controlActionHtml = data.control_action.replace(/\n/g, '<br>');
-                         controlActionHtml = controlActionHtml.replace(/\*\*(Решение|Solution|Control Action):\*\*/g, '<strong>$1:</strong>');
+                         controlActionHtml = controlActionHtml.replace(/\*\*(Решение|Solution|Control Action):\*\*/gi, '<strong>$1:</strong>');
                         formattedOutput += `<br><div><strong>Решение/Контрольные действия:</strong><br>${controlActionHtml}</div>`;
                     } else {
                         formattedOutput += `<p>Решение/Контрольные действия не предоставлены.</p>`;
