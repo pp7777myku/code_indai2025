@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,6 +47,7 @@
             font-size: 0.95em;
         }
         .input-section input[type="text"],
+        .input-section input[type="file"],
         .input-section textarea {
             width: calc(100% - 24px); /* Account for padding */
             padding: 12px;
@@ -58,34 +59,43 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .input-section input[type="text"]:focus,
+        .input-section input[type="file"]:focus,
         .input-section textarea:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
             outline: none;
         }
         .input-section textarea {
-            min-height: 120px;
+            min-height: 100px;
             resize: vertical;
         }
-        .input-section button {
-            display: block;
-            width: 100%;
+        .input-section button, .link-button {
+            display: inline-block; /* Changed for side-by-side */
+            width: auto; /* Fit content */
             padding: 12px 20px;
             background-color: #007bff;
-            color: white;
+            color: white !important; /* Ensure text is white */
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none; /* For <a> styled as button */
+            text-align: center;
+            margin-right: 10px; /* Space between buttons */
         }
-        .input-section button:hover {
+        .input-section button:hover, .link-button:hover {
             background-color: #0056b3;
             transform: translateY(-2px);
         }
-        .input-section button:active {
+        .input-section button:active, .link-button:active {
             transform: translateY(0);
+        }
+        .button-container {
+            display: flex; /* Align buttons in a row */
+            justify-content: flex-start; /* Align to the left */
+            margin-top: 10px;
         }
         .output-section {
             margin-top: 30px;
@@ -103,12 +113,20 @@
             border: 1px solid #cce5ff;
             padding: 20px;
             border-radius: 8px;
-            white-space: pre-wrap; /* Preserve whitespace and line breaks */
-            word-wrap: break-word; /* Break long words */
+            white-space: pre-wrap;
+            word-wrap: break-word;
             min-height: 150px;
             font-size: 0.95em;
             color: #333;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .error-message {
+            color: #D8000C;
+            background-color: #FFD2D2;
+            border: 1px solid #D8000C;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
         .disclaimer {
             font-size: 0.85em;
@@ -125,107 +143,120 @@
         <h2>Интерактивный метод на основе больших языковых моделей</h2>
 
         <div class="input-section">
-            <label for="equipmentName">Название оборудования (например, центробежный насос, ПЛК, производственная линия А):</label>
-            <input type="text" id="equipmentName" name="equipmentName" placeholder="Введите название оборудования (например, 'Гидравлический пресс', 'Конвейерная лента')" required>
+            <label for="systemPrompt">Системная инструкция для ИИ (задайте роль, правила, язык ответа и т.д.):</label>
+            <textarea id="systemPrompt" name="systemPrompt" placeholder="Пример: Вы — опытный инженер по техническому обслуживанию промышленного оборудования...">You are a senior industrial equipment maintenance expert and fault diagnosis engineer. Please accurately diagnose potential fault causes based on the equipment and fault symptoms provided by the user, any attached files (like images or data logs), AND **leveraging the 'Related Knowledge Base Information' provided below**. Then provide detailed, actionable diagnostic steps and solutions.
+
+Please strictly adhere to the following rules:
+1.  **Reference Knowledge Base:** Prioritize using the "Related Knowledge Base Information" for diagnosis. If the knowledge base does not contain a direct match, infer based on your general professional knowledge and any provided files.
+2.  **Analyze Files:** If a file is attached (e.g., an image of the fault, sensor readings, error logs), incorporate its information into your diagnosis.
+3.  **Professionalism:** Use professional terminology from the industrial domain.
+4.  **Detail:** List all possible fault causes, diagnostic steps, and repair measures as comprehensively as possible.
+5.  **Structure:** Your response should be clearly divided into four sections: "Diagnosis Result," "Possible Causes," "Diagnostic Steps," and "Solution."
+6.  **Ask for More Information:** If the information (text or file) is insufficient, proactively ask for more details.
+7.  **Language:** Respond in Russian.
+            </textarea>
+
+            <label for="equipmentName">Название оборудования:</label>
+            <input type="text" id="equipmentName" name="equipmentName" placeholder="Введите название оборудования" value="Гидравлический пресс">
 
             <label for="faultSymptoms">Подробно опишите симптомы неисправности:</label>
-            <textarea id="faultSymptoms" name="faultSymptoms" placeholder="например, 'Насос издает громкий скрежет и сильно вибрирует', 'Выход ПЛК не соответствует показаниям датчиков', 'Производственная линия внезапно останавливается с кодом ошибки E001', 'Двигатель перегревается и издает запах гари'." required></textarea>
+            <textarea id="faultSymptoms" name="faultSymptoms" placeholder="например, 'Насос издает громкий скрежет...'">Пресс не развивает полного давления, медленно движется рабочий цилиндр, слышен посторонний шум в районе насоса.</textarea>
 
-            <button type="submit" onclick="diagnoseFault()">Диагностировать неисправность</button>
+            <label for="faultFile">Загрузить файл с информацией о неисправности (изображение, лог и т.д.):</label>
+            <input type="file" id="faultFile" name="faultFile">
+
+            <div class="button-container">
+                <button type="button" onclick="diagnoseFault()">Диагностировать неисправность</button>
+                <a href="https://docs.google.com/spreadsheets/d/1aBkixQZAWEGN_bDoAbeQ8tSd5fllKrP8tCizhIo79DY/edit?gid=104964265#gid=104964265" target="_blank" class="link-button">Изменить базу знаний</a>
+            </div>
         </div>
 
         <div class="output-section">
             <h3>Результат диагностики</h3>
             <div id="diagnosisOutput" class="output-box">
-                Здесь появится ваш диагноз. Пожалуйста, введите название оборудования и симптомы выше, затем нажмите «Диагностировать неисправность».
+                Здесь появится ваш диагноз.
             </div>
         </div>
-
+         <div class="disclaimer">
+            Обратите внимание: этот инструмент предоставляет предварительные рекомендации...
+        </div>
     </div>
 
     <script>
-        // This JavaScript function is a placeholder for interaction with your backend.
-        // In a real application, you would send the input data to a server (e.g., using fetch API)
-        // and display the structured response received from your Python/LLM logic.
-
-        function diagnoseFault() {
+        async function diagnoseFault() {
+            const systemPrompt = document.getElementById('systemPrompt').value.trim();
             const equipment = document.getElementById('equipmentName').value.trim();
             const symptoms = document.getElementById('faultSymptoms').value.trim();
+            const faultFile = document.getElementById('faultFile').files[0]; // Get the file object
             const outputDiv = document.getElementById('diagnosisOutput');
 
-            if (!equipment || !symptoms) {
-                outputDiv.textContent = "Пожалуйста, укажите название оборудования и подробные симптомы неисправности для получения диагноза.";
+            if (!systemPrompt || !equipment || !symptoms) {
+                outputDiv.innerHTML = `<p class="error-message">Пожалуйста, заполните все обязательные текстовые поля: системную инструкцию, название оборудования и симптомы неисправности.</p>`;
                 return;
             }
 
-            outputDiv.textContent = "Диагностика... Пожалуйста, подождите, пока ИИ обрабатывает информацию.";
+            outputDiv.innerHTML = "Диагностика... Пожалуйста, подождите.";
 
-            // --- Real Backend Integration (Conceptual Example) ---
-            // Uncomment and modify this section when you set up your Python backend API.
-            /*
-            fetch('/api/diagnose', { // Replace with your actual API endpoint
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ equipment: equipment, symptoms: symptoms }),
-            })
-            .then(response => response.json()) // Assuming your backend returns JSON
-            .then(data => {
-                // Assuming 'data' contains fields like:
-                // {
-                //   "diagnosis_result": "...",
-                //   "possible_causes": ["...", "..."],
-                //   "diagnostic_steps": ["...", "..."],
-                //   "solution": "..."
-                // }
-                let formattedOutput = `**Результат диагностики:** ${data.diagnosis_result || 'N/A'}\n\n`;
-                formattedOutput += `**Возможные причины:**\n- ${data.possible_causes ? data.possible_causes.join('\n- ') : 'N/A'}\n\n`;
-                formattedOutput += `**Шаги диагностики:**\n- ${data.diagnostic_steps ? data.diagnostic_steps.join('\n- ') : 'N/A'}\n\n`;
-                formattedOutput += `**Решение:** ${data.solution || 'N/A'}`;
+            const formData = new FormData();
+            formData.append('system_prompt', systemPrompt);
+            formData.append('equipment', equipment);
+            formData.append('symptoms', symptoms);
+            if (faultFile) {
+                formData.append('fault_file', faultFile);
+            }
 
-                outputDiv.textContent = formattedOutput;
-            })
-            .catch(error => {
-                console.error('Error during diagnosis API call:', error);
-                outputDiv.textContent = 'Произошла ошибка при вызове API диагностики. Проверьте сетевое подключение или повторите попытку позже.';
-            });
-            */
-            // --- End Real Backend Integration Example ---
+            try {
+                // We are not setting Content-Type header manually for FormData.
+                // The browser will set it to multipart/form-data with the correct boundary.
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    body: formData,
+                });
 
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {
+                        errorData = { error: `Ошибка сервера: ${response.status}`, details: await response.text() };
+                    }
+                    console.error('Error during diagnosis API call:', errorData);
+                    let errorMsg = `Произошла ошибка: ${errorData.error || response.statusText}`;
+                    if (errorData.details && errorData.details !== errorData.error) {
+                        errorMsg += `<br>Детали: ${errorData.details}`;
+                    }
+                    outputDiv.innerHTML = `<p class="error-message">${errorMsg}</p>`;
+                    return;
+                }
 
-            // --- Placeholder/Mock Response (for immediate testing without a backend) ---
-            // This part will run if the real backend integration is commented out.
-            setTimeout(() => {
-                const dummyDiagnosis = `
-**Результат диагностики:** Согласно описанным вами симптомам, ваше оборудование ${equipment}, по-видимому, имеет критическую эксплуатационную проблему, требующую немедленного расследования.
+                const data = await response.json();
 
-**Возможные причины:**
-- Серьезный внутренний износ компонентов (например, подшипников, шестерен, поршней)
-- Критическое рассогласование механических частей
-- Усталость или повреждение конструкции оборудования
-- Неисправность датчика, приводящая к ошибочным показаниям (менее вероятно, учитывая «скрежет»)
-- Недостаточная смазка или охлаждение, приводящие к перегреву
+                if (data.error) {
+                     outputDiv.innerHTML = `<p class="error-message">Ошибка от сервера: ${data.error}${data.details ? '<br>Детали: ' + data.details : ''}</p>`;
+                } else {
+                    let formattedOutput = "";
+                    if (data.explanation) {
+                        let explanationHtml = data.explanation.replace(/\n/g, '<br>');
+                        explanationHtml = explanationHtml.replace(/\*\*(Результат диагностики|Возможные причины|Диагностические шаги|Diagnosis Result|Possible Causes|Diagnostic Steps):\*\*/g, '<strong>$1:</strong>');
+                        formattedOutput += `<div>${explanationHtml}</div>`;
+                    } else {
+                        formattedOutput += `<p>Объяснение не предоставлено.</p>`;
+                    }
 
-**Шаги диагностики:**
-- **Немедленно выключите** оборудование, чтобы предотвратить дальнейшие повреждения или угрозы безопасности.
-- Визуально осмотрите доступные области на предмет явных признаков повреждений, утечек или ослабленных компонентов.
-- Прослушайте точное местоположение и тип шума с помощью стетоскопа или прибора для прослушивания.
-- Проверьте рабочую температуру двигателя, подшипников и других критически важных компонентов.
-- Просмотрите последние журналы технического обслуживания и рабочие параметры на предмет аномалий.
-- Если безопасно и доступно, вручную поверните или проверьте компоненты, чтобы определить источник сопротивления или шума.
-- Обратитесь к техническому руководству оборудования за конкретными инструкциями по устранению неполадок, связанных с такими симптомами.
+                    if (data.control_action) {
+                         let controlActionHtml = data.control_action.replace(/\n/g, '<br>');
+                         controlActionHtml = controlActionHtml.replace(/\*\*(Решение|Solution|Control Action):\*\*/g, '<strong>$1:</strong>');
+                        formattedOutput += `<br><div><strong>Решение/Контрольные действия:</strong><br>${controlActionHtml}</div>`;
+                    } else {
+                        formattedOutput += `<p>Решение/Контрольные действия не предоставлены.</p>`;
+                    }
+                    outputDiv.innerHTML = formattedOutput;
+                }
 
-**Решение:**
-- Если подозревается **износ подшипников**, запланируйте срочную замену всех затронутых подшипников.
-- Если обнаружено **рассогласование**, выполните точное выравнивание с помощью лазерных инструментов.
-- При **повреждении конструкции** оцените степень повреждения и рассмотрите возможность ремонта или замены затронутой части.
-- Обеспечьте правильную и адекватную **смазку**. Проверьте уровень и качество смазки, при необходимости долейте/замените.
-- После любого ремонта проведите тщательное эксплуатационное тестирование и мониторинг перед возвратом к полной эксплуатации.
-                `;
-                outputDiv.textContent = dummyDiagnosis;
-            }, 1800); // Simulate network delay for a better user experience
-            // --- End Placeholder/Mock Response ---
+            } catch (error) {
+                console.error('Client-side error during diagnosis API call:', error);
+                outputDiv.innerHTML = `<p class="error-message">Произошла ошибка на стороне клиента при вызове API диагностики. Проверьте консоль для деталей.</p>`;
+            }
         }
     </script>
 </body>
