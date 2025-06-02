@@ -13,8 +13,8 @@ import logging
 from typing import Optional, List
 
 # --- 代理设置 (如果不需要，请保持注释状态) ---
-os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
-os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:20172"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:20172"
 # logger.info(f"Using HTTPS_PROXY: {os.getenv('HTTPS_PROXY')}") # 可选: 记录代理设置
 # logger.info(f"Using HTTP_PROXY: {os.getenv('HTTP_PROXY')}")   # 可选: 记录代理设置
 
