@@ -16,6 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --trusted-host pypi.python.org -r requirements.txt
 
 # 将项目中的其他所有文件和文件夹复制到容器的 /app 目录下
+# 强烈建议在此之前添加一个 .dockerignore 文件，以排除不必要的文件
 COPY . .
 
 # 声明容器在运行时监听的端口（这里是 8000）
@@ -27,10 +28,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # 容器启动时运行的命令
-# 假设你的 Flask 应用对象在 main.py 文件中名为 'app'
-# 并且你希望使用 Gunicorn 来运行它
-# 如果你的入口文件或应用对象名称不同，请相应修改 'main:app'
-# 如果 main.py 是直接可执行的并且自己启动服务器 (例如 app.run(host='0.0.0.0'))
-# 你可以使用: CMD ["python", "main.py"]
-# 但对于生产环境，推荐为 Flask 使用 Gunicorn 这样的 WSGI 服务器。
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "main:app"]
+# 使用 Gunicorn 并指定 Uvicorn worker 来运行 FastAPI 应用
+# -w 4: 指定4个worker进程 (您可以根据服务器CPU核心数调整，通常是 2 * CPU核心数 + 1)
+# -k uvicorn.workers.UvicornWorker: 指定使用Uvicorn的worker类来处理ASGI应用
+# --bind 0.0.0.0:8000: 监听所有网络接口的8000端口
+# main:app: 假设您的FastAPI应用实例在main.py文件中名为app
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "main:app"]

@@ -1,0 +1,11 @@
+# docker-compose.yml
+version: '3.8' # 或者更新的版本
+services:
+  web: # 您的服务名，例如您的 FastAPI 应用
+    build: .  # 这告诉 Docker Compose 在当前目录 (.) 查找 Dockerfile 并用它来构建镜像
+    ports:
+      - "8000:8000" # 将宿主机的 8000 端口映射到容器的 8000 端口
+    environment:
+      - GEMINI_API_KEY=AIzaSyA5LKura1iYmoitNfTgz6SYJ8F_iif_Jm4
+      - HTTP_PROXY=http://host.docker.internal:7890      # 从运行 docker-compose 的环境继承代理设置
+      - HTTPS_PROXY=http://host.docker.internal:7890     # 或者直接在这里设置固定的值
