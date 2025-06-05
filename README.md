@@ -1,4 +1,4 @@
-Python 3.13
+Python 3.10+
 
 docker build -t my-gemini-app .
 
